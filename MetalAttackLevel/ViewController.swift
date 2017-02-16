@@ -16,15 +16,15 @@ class ViewController: NSViewController {
         // Do any additional setup after loading the view.
     }
 
-    override var representedObject: AnyObject? {
+    override var representedObject: Any? {
         didSet {
         // Update the view, if already loaded.
         }
     }
 
-    @IBAction func generateLevels(sender: AnyObject) {
+    @IBAction func generateLevels(_ sender: AnyObject) {
         let levelGenerator = LevelGenerator()
-        levelGenerator.generateLevel(190)
+        levelGenerator.generateLevel(100)
         
    
     }

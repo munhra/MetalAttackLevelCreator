@@ -15,7 +15,8 @@ class LevelGenerator {
     
     var gameLevels = Array<Level>()
     var enemies = Array<Enemy>()
-    var contextLevels = [10,31,62,113,194]
+    var contextLevels = [20,20,20,20,20]
+    var contextLowerBound = [1,21,41,61,81]
     
     var enemyContext1Array:Array<Enemy> = Array<Enemy>()
     var enemyContext2Array:Array<Enemy> = Array<Enemy>()
@@ -26,18 +27,23 @@ class LevelGenerator {
     var enemyArray:Array<Array<Enemy>> = Array<Array<Enemy>>()
     
     
-    func generateLevel(totalNumberOfLevels:Int) {
+    func generateLevel(_ totalNumberOfLevels:Int) {
         
         loadEnemies()
         
         for levelNumber in 2...totalNumberOfLevels {
             //let enemies = log2(Double(levelNumber)) * 5
-            let enemies = log2(Double(levelNumber)) * 3
+            //let enemies = log2(Double(levelNumber)) * 3
             //let enemies = log10(Double(levelNumber))
             //let enemies = pow(Double(levelNumber),2.0)
             
+            let enemies = log2(Double(levelNumber)) * 1.5
+            
             let enemiesWithFactor = Int(enemies) * 8
-            //print("\(levelNumber) --> number of enemies per level \(enemiesWithFactor)")
+            
+            
+            
+            print("\(levelNumber) --> number of enemies per level \(enemiesWithFactor)")
             
             let wavesArray = self.calculateWaves(enemiesWithFactor)
             
@@ -64,8 +70,8 @@ class LevelGenerator {
                               Enemy(name: "Fat_Cat", armor: 5, damage: 5, timeToReach: 3, enemyContext: 1),
                               Enemy(name: "The_Gardener", armor: 8, damage: 8, timeToReach: 4, enemyContext: 1)]
         
-        enemyContext2Array = [Enemy(name: "Cooker",armor: 2, damage: 2, timeToReach: 3, enemyContext: 2),
-                              Enemy(name: "Bully",armor: 4, damage: 4, timeToReach: 6, enemyContext: 2),
+        enemyContext2Array = [Enemy(name: "Cooker",armor: 3, damage: 3, timeToReach: 3, enemyContext: 2),
+                              Enemy(name: "Bully",armor: 4, damage: 4, timeToReach: 3, enemyContext: 2),
                               Enemy(name: "Cheerleader", armor: 6, damage: 6, timeToReach: 4, enemyContext: 2),
                               Enemy(name: "CrazyTeacher", armor: 10, damage: 10, timeToReach: 4, enemyContext: 2),
                               Enemy(name: "Principal",armor: 16, damage: 16, timeToReach: 3, enemyContext: 2)]
@@ -89,40 +95,40 @@ class LevelGenerator {
                               Enemy(name: "Motoqueiro",armor: 40, damage: 40, timeToReach: 4, enemyContext: 5)]
         
         //sort arrays by enemy power
-        enemyContext1Array = enemyContext1Array.sort({$0.enemyPower < $1.enemyPower})
-        enemyContext2Array = enemyContext2Array.sort({$0.enemyPower < $1.enemyPower})
-        enemyContext3Array = enemyContext3Array.sort({$0.enemyPower < $1.enemyPower})
-        enemyContext4Array = enemyContext4Array.sort({$0.enemyPower < $1.enemyPower})
-        enemyContext5Array = enemyContext5Array.sort({$0.enemyPower < $1.enemyPower})
+        enemyContext1Array = enemyContext1Array.sorted(by: {$0.enemyPower < $1.enemyPower})
+        enemyContext2Array = enemyContext2Array.sorted(by: {$0.enemyPower < $1.enemyPower})
+        enemyContext3Array = enemyContext3Array.sorted(by: {$0.enemyPower < $1.enemyPower})
+        enemyContext4Array = enemyContext4Array.sorted(by: {$0.enemyPower < $1.enemyPower})
+        enemyContext5Array = enemyContext5Array.sorted(by: {$0.enemyPower < $1.enemyPower})
         
         
         enemyArray = [enemyContext1Array,enemyContext2Array,enemyContext3Array,enemyContext4Array,enemyContext5Array]
         
     }
     
-    func calculateContextCompleteness(levelNumber:Int) -> Float {
+    func calculateContextCompleteness(_ levelNumber:Int) -> Float {
         
         
         
         return 0.0
     }
     
-    func calculateLevelContext(levelNumber:Int) -> Int {
+    func calculateLevelContext(_ levelNumber:Int) -> Int {
         
         switch levelNumber {
-        case 1...10:
+        case 1...20:
             //print("Garage Context")
             return 1
-        case 11...31: // + 20
+        case 21...40: // + 20
             //print("School Context")
             return 2
-        case 32...62: // + 30
+        case 41...60: // + 30
             //print("Bar Context")
             return 3
-        case 63...113: // + 50
+        case 61...80: // + 50
             //print("Prision Context")
             return 4
-        case 114...194: // + 80
+        case 81...100: // + 80
             //print("Gas Station Context")
             return 5
         default:
@@ -131,50 +137,73 @@ class LevelGenerator {
         }
     }
     
-    func chooseEnemies(levelContextIndex:Int, levelNumber:Int) -> Array<String> {
+    func chooseEnemies(_ levelContextIndex:Int, levelNumber:Int) -> Array<String> {
         // low probability of a powerfull enemy to appear on the first level
         // high probability of a powerfull enemy appear on last level
         // 1..10
         // 114..194
-        
+        print("Level Context index \(levelContextIndex)")
         let totalLevelsPerContext = contextLevels[levelContextIndex - 1]
-        let levelCompleteness:Float = Float(levelNumber) / Float(totalLevelsPerContext)
+        let levelCompleteness:Float = Float(levelNumber - contextLowerBound[levelContextIndex - 1]) / Float(totalLevelsPerContext)
         
-        let randomFactor = Int(5 * levelCompleteness)
+        
+        let randomFactor = Int(10 * levelCompleteness)
         let correctedFactor = min(randomFactor,5)
         //print("\(correctedFactor)")
         
         var selectedEnemiesArray = Array<String>()
         let enemyContextArray = enemyArray[levelContextIndex - 1]
-        
+        print("levelNumber \(levelNumber) correctedFactor \(correctedFactor) levelCompleteness \(levelCompleteness)")
         for _ in 1...5 {
-            var randomEnemyPosition = random() % correctedFactor + Int( 1 * levelCompleteness)
+            var randomEnemyPosition = Int(arc4random_uniform(UInt32(correctedFactor))) + Int(1 * levelCompleteness)
             randomEnemyPosition = min(randomEnemyPosition,4)
-            let selectedEnemy = enemyContextArray[randomEnemyPosition]
+            var selectedEnemy = enemyContextArray[randomEnemyPosition]
+            
+            let filteredEnemies = selectedEnemiesArray.filter({$0 == selectedEnemy.name})
+            
+            if filteredEnemies.count == 3 {
+                selectedEnemy = enemyContextArray[min(randomEnemyPosition+1,4)]
+            }
+            
+            
+            
+            
             selectedEnemiesArray.append(selectedEnemy.name)
         }
         
         return selectedEnemiesArray
     }
     
-    func calculateWaves(totalEnemies:Int) -> Array<String> {
+    func calculateWaves(_ totalEnemies:Int) -> Array<String> {
         
         var wavesArray = Array<String>()
         
         if totalEnemies > 8 {
             
-            let maxWaveNumber = totalEnemies / 8
+            //let maxWaveNumber = totalEnemies / 8
+            let maxWaveNumber = min(24,totalEnemies)
             var enemiesLeft = totalEnemies
-            var waveMultiple = 1 + random() % maxWaveNumber
+            
+            
+            var waveMultiple = Int(arc4random_uniform(UInt32(maxWaveNumber/8)) + 1)
             
             while enemiesLeft > 0 {
                 
-                let enemiesInWave = waveMultiple * 8
+                let enemiesInWave = min(waveMultiple * 8,maxWaveNumber)
                 wavesArray.append("\(enemiesInWave)")
                 enemiesLeft = enemiesLeft - enemiesInWave
                 if enemiesLeft > 0 {
-                    waveMultiple = 1 + random() % enemiesLeft/8
-                    //print("waveMultiple -> \(waveMultiple)  number of enemies -> \(enemiesLeft)")
+            
+                    
+                    //waveMultiple = Int(arc4random_uniform(UInt32(enemiesLeft/8)) + 1)
+                    waveMultiple = Int(arc4random_uniform(UInt32(maxWaveNumber/8)) + 1)
+                    //waveMultiple = min(maxWaveNumber,waveMultiple)
+                    if waveMultiple == (maxWaveNumber/8) {
+                        waveMultiple = Int(arc4random_uniform(UInt32(maxWaveNumber/8))) + 1
+                    }
+                    
+                    
+                    print("waveMultiple -> \(waveMultiple)  number of enemies -> \(enemiesLeft)")
                 }
             }
         }else{
@@ -191,18 +220,18 @@ class LevelGenerator {
         
         for gameLevel in gameLevels {
             var levelDict = Dictionary<String,AnyObject>()
-            levelDict["levelNumber"] = gameLevel.levelNumber
-            levelDict["levelContext"] = gameLevel.levelContext
-            levelDict["levelTotalEnemies"] = gameLevel.totalEnemies
-            levelDict["avaliableEnemies"] = "5"
-            levelDict["waves"] = gameLevel.waves
-            levelDict["enemies"] = gameLevel.enemies
-            levelArrayDict.append(levelDict)
+            levelDict["levelNumber"] = gameLevel.levelNumber as AnyObject?
+            levelDict["levelContext"] = gameLevel.levelContext as AnyObject?
+            levelDict["levelTotalEnemies"] = gameLevel.totalEnemies as AnyObject?
+            levelDict["avaliableEnemies"] = "5" as AnyObject?
+            levelDict["waves"] = gameLevel.waves as AnyObject?
+            levelDict["enemies"] = gameLevel.enemies as AnyObject?
+            levelArrayDict.append(levelDict as AnyObject)
         }
         
         do {
-            let objData = try NSJSONSerialization.dataWithJSONObject(levelArrayDict, options: NSJSONWritingOptions.PrettyPrinted)
-            let jsonStr = String(data:objData, encoding: NSUTF8StringEncoding)
+            let objData = try JSONSerialization.data(withJSONObject: levelArrayDict, options: JSONSerialization.WritingOptions.prettyPrinted)
+            let jsonStr = String(data:objData, encoding: String.Encoding.utf8)
             print(jsonStr!)
             
         }catch {
