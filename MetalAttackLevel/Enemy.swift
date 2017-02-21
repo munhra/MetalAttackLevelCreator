@@ -16,14 +16,18 @@ class Enemy {
     var timeToReach:Int = 0
     var enemyPower:Float = 0.0
     var enemyContext:Int = 0
+    var dropCoinHighLevel:Int = 0
+    var dropCoinLowerLevel:Int = 0
     
-    init(name:String, armor:Int, damage:Int, timeToReach:Int, enemyContext:Int){
+    init(name:String, armor:Int, damage:Int, timeToReach:Int, enemyContext:Int, dropCoinLowerLevel:Int, dropCoinHighLevel:Int) {
         self.name = name
         self.armor = armor
         self.damage = damage
         self.timeToReach = timeToReach
         self.enemyContext = enemyContext
-    
+        self.dropCoinLowerLevel = dropCoinLowerLevel
+        self.dropCoinHighLevel = dropCoinHighLevel
+        
         self.enemyPower = Float(armor) + Float(damage) + Float(1/timeToReach)
         
         
